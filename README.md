@@ -68,7 +68,11 @@ python pipeline.py
 ---
 
 ## 📺 Demo
+<<<<<<< HEAD
 ![Demo Video](https://drive.google.com/file/d/1e-EdXy2bHatIzOaVyAYmAirrVUDm2zKL/view?usp=sharing)
+=======
+[Watch the Demo Video on Google Drive](https://drive.google.com/file/d/1e-EdXy2bHatIzOaVyAYmAirrVUDm2zKL/view?usp=sharing)
+>>>>>>> 28eb0d3 (Docs: Update README with demo video link)
 
 ---
 
