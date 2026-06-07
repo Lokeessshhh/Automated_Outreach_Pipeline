@@ -67,6 +67,7 @@ def stage_2_prospeo(domains):
             response = requests.post(url, headers=headers, json=payload, timeout=30)
             response.raise_for_status()
             data = response.json()
+            # LIMIT: Only take the top 1 prospect per domain
             for item in data.get("results", [])[:1]:
                 person = item.get("person", {})
                 company = item.get("company", {})
@@ -85,41 +86,68 @@ def stage_2_prospeo(domains):
     return prospects
 
 def stage_3_apollo_enrich(prospects):
-    """STAGE 3 - Get emails via Apollo.io match API"""
+    """STAGE 3 - Two-step Apollo.io Enrichment (Search then Match)"""
     print(f"\n[STAGE 3] Enriching {len(prospects)} prospects with Apollo...")
-    url = "https://api.apollo.io/api/v1/people/match"
-    headers = {"X-Api-Key": APOLLO_API_KEY, "Content-Type": "application/json"}
+    search_url = "https://api.apollo.io/api/v1/mixed_people/api_search"
+    match_url = "https://api.apollo.io/api/v1/people/match"
+    headers = {
+        "X-Api-Key": APOLLO_API_KEY, 
+        "Content-Type": "application/json",
+        "accept": "application/json"
+    }
 
     final_contacts = []
     seen_emails = set()
 
     for p in prospects[:5]:
-        print(f"Matching {p['first_name']} {p['last_name']} ({p['domain']})...")
-        payload = {
-            "first_name": p["first_name"],
-            "last_name": p["last_name"],
-            "domain": p["domain"],
-            "reveal_personal_emails": False
+        print(f"Searching {p['first_name']} {p['last_name']} ({p['domain']})...")
+        # Step A: Search for Person ID
+        search_payload = {
+            "q_organization_domains_list": [p["domain"]],
+            "q_keywords": f"{p['first_name']} {p['last_name']}",
+            "page": 1,
+            "per_page": 1
         }
+        
         try:
-            response = requests.post(url, headers=headers, json=payload, timeout=30)
-            response.raise_for_status()
-            data = response.json()
-            person = data.get("person", {})
-            email = person.get("email")
+            # 1. Search to get the Apollo ID
+            search_res = requests.post(search_url, headers=headers, json=search_payload, timeout=30)
+            search_res.raise_for_status()
+            people = search_res.json().get("people", [])
 
-            if email and email not in seen_emails:
-                final_contacts.append({
-                    "first_name": p["first_name"],
-                    "name": f"{p['first_name']} {p['last_name']}",
-                    "email": email,
-                    "title": p["title"],
-                    "company": person.get("organization", {}).get("name", p["company_name"])
-                })
-                seen_emails.add(email)
+            if people:
+                person_id = people[0].get("id")
+                
+                # 2. Match/Enrich to get the actual email
+                print(f"Enriching ID {person_id} to get email...")
+                match_payload = {
+                    "id": person_id,
+                    "reveal_personal_emails": False
+                }
+                match_res = requests.post(match_url, headers=headers, json=match_payload, timeout=30)
+                match_res.raise_for_status()
+                
+                enriched_person = match_res.json().get("person", {})
+                email = enriched_person.get("email")
+                
+                if email and email not in seen_emails:
+                    final_contacts.append({
+                        "first_name": p["first_name"],
+                        "name": f"{p['first_name']} {p['last_name']}",
+                        "email": email,
+                        "title": p["title"],
+                        "company": enriched_person.get("organization", {}).get("name", p["company_name"])
+                    })
+                    seen_emails.add(email)
+            
             time.sleep(SLEEP_TIME)
         except Exception as e:
-            print(f"Apollo error for {p['first_name']}: {e}")
+            print(f"Apollo enrichment error for {p['first_name']}: {e}")
+            try:
+                if 'search_res' in locals(): print(f"Search Response: {search_res.text}")
+                if 'match_res' in locals(): print(f"Match Response: {match_res.text}")
+            except:
+                pass
 
     print(f"Verified {len(final_contacts)} emails.")
     return final_contacts
