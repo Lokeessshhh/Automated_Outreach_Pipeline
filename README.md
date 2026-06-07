@@ -1,87 +1,83 @@
 # 🚀 Automated Outreach Pipeline
 
-A production-grade, 4-stage cold outreach automation system that identifies lookalike companies, finds decision-makers, enriches contact data, and automates personalized email delivery.
+A fully automated, 4-stage cold outreach system — one domain in, personalized emails out. Zero manual steps.
 
-## 🌟 Key Features
+---
 
-- **Stage 1 (Ocean.io):** Intelligent lookalike company discovery based on a seed domain.
-- **Stage 2 (Prospeo Search):** Targeted decision-maker identification (C-Suite, VP, Founders).
-- **Stage 3 (Enrichment):** Dual-method contact enrichment (Prospeo native or Apollo.io fallback).
-- **Stage 4 (Brevo):** Automated, personalized outreach via SMTP.
-- **Production Controls:** Global rate limiting, safety checkpoints (Y/N), and automatic deduplication.
+## 🌟 How It Works
+
+| Stage | Tool | What it does |
+|-------|------|-------------|
+| 1 | Ocean.io | Finds 5 lookalike companies from seed domain |
+| 2 | Prospeo Search | Finds C-Suite/VP/Founder decision-makers |
+| 3 | Prospeo Enrich / Apollo.io | Gets verified work emails |
+| 4 | Brevo | Sends personalized cold emails |
 
 ---
 
 ## 🛠️ Tech Stack
 
 - **Language:** Python 3.12+
-- **APIs:** Ocean.io (v3), Prospeo (Search & Enrich), Apollo.io (Match), Brevo (v3)
+- **APIs:** Ocean.io (v3), Prospeo (Search & Enrich), Apollo.io (fallback), Brevo (v3)
 - **Libraries:** `requests`, `python-dotenv`
 
 ---
 
 ## 📂 Project Structure
 
-- `pipeline.py`: **Primary consolidated pipeline.** Uses Prospeo for both search and enrichment (recommended).
-- `Pipeline01.py`: **Apollo.io fallback version.** Uses Prospeo for search and Apollo.io for enrichment.
-- `requirements.txt`: Project dependencies.
-- `.env.example`: Configuration template for API keys.
+| File | Description |
+|------|-------------|
+| `pipeline.py` | Main pipeline using Prospeo for enrichment (recommended) |
+| `Pipeline01.py` | Apollo.io version for email enrichment |
+| `requirements.txt` | Dependencies |
+| `.env.example` | API keys template |
 
 ---
 
 ## 🚀 Getting Started
 
-### 1. Prerequisites
-- Python 3.12 or higher installed.
-- API keys for Ocean.io, Prospeo, Apollo.io (optional), and Brevo.
-
-### 2. Installation
+### 1. Clone & Install
 ```bash
-# Clone the repository
 git clone https://github.com/Lokeessshhh/Automated_Outreach_Pipeline.git
 cd Automated_Outreach_Pipeline
-
-# Create and activate virtual environment
 python -m venv venv
-source venv/Scripts/activate  # On Windows
-
-# Install dependencies
+venv\Scripts\activate  # Windows
 pip install -r requirements.txt
 ```
 
-### 3. Configuration
-Rename `.env.example` to `.env` and fill in your credentials:
+### 2. Configure `.env`
 ```env
 OCEAN_API_KEY=your_key
 PROSPEO_API_KEY=your_key
-APOLLO_API_KEY=your_key (required for Pipeline01.py)
+APOLLO_API_KEY=your_key
 BREVO_API_KEY=your_key
 SENDER_EMAIL=your_verified_brevo_email
 SENDER_NAME=Your Name
 ```
 
-### 4. Running the Pipeline
+### 3. Run
 ```bash
 python pipeline.py
 ```
 
+Enter a seed domain (e.g. `stripe.com`) and the pipeline runs automatically.
+
 ---
 
 ## 📺 Demo
-<<<<<<< HEAD
-![Demo Video](https://drive.google.com/file/d/1e-EdXy2bHatIzOaVyAYmAirrVUDm2zKL/view?usp=sharing)
-=======
+
 [Watch the Demo Video on Google Drive](https://drive.google.com/file/d/1e-EdXy2bHatIzOaVyAYmAirrVUDm2zKL/view?usp=sharing)
->>>>>>> 28eb0d3 (Docs: Update README with demo video link)
 
 ---
 
-## 🛡️ Safety & Compliance
-- **Rate Limiting:** Built-in 3-second delay between API calls to ensure compliance.
-- **Verification:** Mandatory safety checkpoint to review contacts before emails are fired.
-- **Deduplication:** Prevents multiple emails to the same contact in a single run.
+## 🛡️ Safety Features
+
+- ⏱️ 3-second rate limiting between API calls
+- ✋ Safety checkpoint — review all contacts before emails fire
+- 🔁 Deduplication — no duplicate emails in one run
 
 ---
 
 ## 📄 License
+
 MIT License. See [LICENSE](LICENSE) for details.
