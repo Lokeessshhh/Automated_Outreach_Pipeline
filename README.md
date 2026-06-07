@@ -68,7 +68,7 @@ python pipeline.py
 ---
 
 ## 📺 Demo
-![Demo Video](demo_placeholder.mp4)
+![Demo Video](https://drive.google.com/file/d/1e-EdXy2bHatIzOaVyAYmAirrVUDm2zKL/view?usp=sharing)
 
 ---
 
